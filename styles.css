@@ -1,0 +1,98 @@
+:root {
+  --text-color: #000000;
+  --body-color: #FFFFFF;
+  --hover-color: #BDAE82;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+li{
+  list-style: none;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Merriweather Sans', sans-serif;
+  font-size: 12px;
+}
+
+.body{
+  background-color: var(--body-color);
+}
+
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 1280px;
+  margin: 0 auto;
+}
+
+.title {
+  margin: 20px auto;
+  font-family: Merriweather, sans-serif;
+  font-size: 48px;
+}
+
+.textContainer {
+  margin: 0 auto;
+  padding: 10px;
+  height: 25vh;
+  width: 100%;
+  border-radius: 5px;
+  font-family: Merriweather, sans-serif;
+  font-size: 32px;
+  resize: none;
+}
+
+.keyboard {
+  width: 100%;
+  margin: 10px auto;
+  padding: 10px;
+  border: 1px solid var(--text-color);
+  border-radius: 5px;
+}
+
+.keyboard-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.keyboard-key {
+  height: 70px;
+  margin: 5px;
+  border: 1px solid var(--text-color);
+  border-radius: 5px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  text-align: center;
+  /* outline: none; */
+  transition: all 0.2s;
+  font-family: Merriweather, sans-serif;
+  font-size: 32px;
+}
+
+.keyboard-key:hover {
+  background: var(--hover-color);
+}
+
+.keyboard-key-type1{
+  width: 70px;
+}
+
+.keyboard-key-type2{
+  width: 90px;
+}
+
+.keyboard-key-type3{
+  width: 140px;
+}
+
+.keyboard-key-space{
+  width: 390px;
+}
