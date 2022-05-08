@@ -536,7 +536,6 @@ class MyKeyboard {
       }
 
       if (!this.allKeys[keyPress.dataset.keyCode].hasFunction) {
-        // Тут прописать алгоритм по Caps$Shift
         let CapsParam = this.isCaps && this.allKeys[keyPress.dataset.keyCode].caps[this.language];
         if (this.isShift) CapsParam = !CapsParam;
         this.insertText(this.allKeys[keyPress.dataset.keyCode].writing[this.language][CapsParam]);
@@ -619,7 +618,7 @@ class MyKeyboard {
       }
     });
 
-    this.keyboard.addEventListener('click', (event) => {
+    this.keyboard.addEventListener('mousedown', (event) => {
       if (event.target.classList.contains('keyboard-key')) {
         this.textContainer.focus();
 
@@ -631,6 +630,12 @@ class MyKeyboard {
         });
 
         document.dispatchEvent(eventHoldDown);
+      }
+    });
+
+    this.keyboard.addEventListener('mouseup', (event) => {
+      if (event.target.classList.contains('keyboard-key')) {
+        this.textContainer.focus();
 
         const eventReleased = new KeyboardEvent('keyup', {
           bubbles: true,
