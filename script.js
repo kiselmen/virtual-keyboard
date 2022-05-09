@@ -532,22 +532,10 @@ class MyKeyboard {
       if (!keyPress) return;
       event.preventDefault();
 
-      keyPress.classList.add('active');
-
       const contecst = this;
       function removeKeyActivity(removeEvent) {
         removeEvent.target.removeEventListener('mouseleave', removeKeyActivity);
-        if (removeEvent.target.dataset.keyCode === 'ShiftLeft' || removeEvent.target.dataset.keyCode === 'ShiftRight') {
-          if (!removeEvent.target.classList.contains('active')) return;
-          if (contecst.shiftCount === 1) {
-            contecst.isShift = !contecst.isShift;
-            contecst.shiftCount = 0;
-          } else {
-            contecst.shiftCount -= 1;
-          }
-          contecst.showSymbols(contecst, contecst.language, contecst.isCaps, contecst.isShift);
-          removeEvent.target.classList.remove('active');
-        } else if (removeEvent.target.dataset.keyCode !== 'CapsLock') {
+        if (removeEvent.target.dataset.keyCode !== 'CapsLock' && removeEvent.target.dataset.keyCode !== 'ShiftLeft' && removeEvent.target.dataset.keyCode !== 'ShiftRight') {
           contecst.showSymbols(contecst, contecst.language, contecst.isCaps, contecst.isShift);
           removeEvent.target.classList.remove('active');
         }
@@ -564,11 +552,14 @@ class MyKeyboard {
         this.showSymbols(this, this.language, this.isCaps, this.isShift);
       } else if ((event.code === 'ShiftLeft') || (event.code === 'ShiftRight')) {
         if (!event.repeat) {
-          if (this.shiftCount === 0) {
-            this.isShift = !this.isShift;
+          keyPress.addEventListener('mouseleave', removeKeyActivity);
+          if (!keyPress.classList.contains('active')) {
+            if (this.shiftCount === 0) {
+              this.isShift = !this.isShift;
+            }
+            this.shiftCount += 1;
+            this.showSymbols(this, this.language, this.isCaps, this.isShift);
           }
-          this.shiftCount += 1;
-          this.showSymbols(this, this.language, this.isCaps, this.isShift);
         }
       } else if ((event.code === 'ControlLeft') || (event.code === 'ControlRight') || (event.metaKey)) {
         if (!event.repeat) {
@@ -603,6 +594,7 @@ class MyKeyboard {
       } else if (event.code === 'ArrowUp') {
         this.doUp();
       }
+      keyPress.classList.add('active');
     });
 
     document.addEventListener('keyup', (event) => {
@@ -646,31 +638,61 @@ class MyKeyboard {
 
     this.keyboard.addEventListener('mousedown', (event) => {
       if (event.target.classList.contains('keyboard-key')) {
-        this.textContainer.focus();
+        if (event.target.dataset.keyCode !== 'ShiftLeft' && event.target.dataset.keyCode !== 'ShiftRight') {
+          this.textContainer.focus();
 
-        const eventHoldDown = new KeyboardEvent('keydown', {
-          bubbles: true,
-          cancelable: true,
-          code: event.target.dataset.keyCode,
-          view: window,
-        });
+          const eventHoldDown = new KeyboardEvent('keydown', {
+            bubbles: true,
+            cancelable: true,
+            code: event.target.dataset.keyCode,
+            view: window,
+          });
 
-        document.dispatchEvent(eventHoldDown);
+          document.dispatchEvent(eventHoldDown);
+        }
       }
     });
 
     this.keyboard.addEventListener('mouseup', (event) => {
       if (event.target.classList.contains('keyboard-key')) {
-        this.textContainer.focus();
+        if (event.target.dataset.keyCode !== 'ShiftLeft' && event.target.dataset.keyCode !== 'ShiftRight') {
+          this.textContainer.focus();
 
-        const eventReleased = new KeyboardEvent('keyup', {
-          bubbles: true,
-          cancelable: true,
-          code: event.target.dataset.keyCode,
-          view: window,
-        });
+          const eventReleased = new KeyboardEvent('keyup', {
+            bubbles: true,
+            cancelable: true,
+            code: event.target.dataset.keyCode,
+            view: window,
+          });
 
-        document.dispatchEvent(eventReleased);
+          document.dispatchEvent(eventReleased);
+        }
+      }
+    });
+
+    this.keyboard.addEventListener('click', (event) => {
+      if (event.target.classList.contains('keyboard-key')) {
+        if (event.target.dataset.keyCode === 'ShiftLeft' || event.target.dataset.keyCode === 'ShiftRight') {
+          this.textContainer.focus();
+          let eventReleased = null;
+          if (!event.target.classList.contains('active')) {
+            eventReleased = new KeyboardEvent('keydown', {
+              bubbles: true,
+              cancelable: true,
+              code: event.target.dataset.keyCode,
+              view: window,
+            });
+          } else {
+            eventReleased = new KeyboardEvent('keyup', {
+              bubbles: true,
+              cancelable: true,
+              code: event.target.dataset.keyCode,
+              view: window,
+            });
+          }
+
+          document.dispatchEvent(eventReleased);
+        }
       }
     });
   }
