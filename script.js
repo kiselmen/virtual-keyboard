@@ -463,6 +463,7 @@ class MyKeyboard {
     this.isCaps = false;
     this.isCtr = false;
     this.isShift = false;
+    this.shiftCount = 0;
   }
 
   initialize() {
@@ -506,7 +507,7 @@ class MyKeyboard {
 
     document.body.append(this.mainContainer);
 
-    this.showSymbols(this.language);
+    this.showSymbols(this, this.language);
 
     this.addActivity();
   }
@@ -528,25 +529,46 @@ class MyKeyboard {
         }
       });
 
-      if (keyPress) {
-        keyPress.classList.add('active');
-        event.preventDefault();
-      } else {
-        return;
+      if (!keyPress) return;
+      event.preventDefault();
+
+      keyPress.classList.add('active');
+
+      const contecst = this;
+      function removeKeyActivity(removeEvent) {
+        removeEvent.target.removeEventListener('mouseleave', removeKeyActivity);
+        if (removeEvent.target.dataset.keyCode === 'ShiftLeft' || removeEvent.target.dataset.keyCode === 'ShiftRight') {
+          if (!removeEvent.target.classList.contains('active')) return;
+          if (contecst.shiftCount === 1) {
+            contecst.isShift = !contecst.isShift;
+            contecst.shiftCount = 0;
+          } else {
+            contecst.shiftCount -= 1;
+          }
+          contecst.showSymbols(contecst, contecst.language, contecst.isCaps, contecst.isShift);
+          removeEvent.target.classList.remove('active');
+        } else if (removeEvent.target.dataset.keyCode !== 'CapsLock') {
+          contecst.showSymbols(contecst, contecst.language, contecst.isCaps, contecst.isShift);
+          removeEvent.target.classList.remove('active');
+        }
       }
 
+      keyPress.addEventListener('mouseleave', removeKeyActivity);
+
       if (!this.allKeys[keyPress.dataset.keyCode].hasFunction) {
-        // Тут прописать алгоритм по Caps$Shift
         let CapsParam = this.isCaps && this.allKeys[keyPress.dataset.keyCode].caps[this.language];
         if (this.isShift) CapsParam = !CapsParam;
         this.insertText(this.allKeys[keyPress.dataset.keyCode].writing[this.language][CapsParam]);
       } else if (event.code === 'CapsLock') {
         this.isCaps = !this.isCaps;
-        this.showSymbols(this.language, this.isCaps, this.isShift);
+        this.showSymbols(this, this.language, this.isCaps, this.isShift);
       } else if ((event.code === 'ShiftLeft') || (event.code === 'ShiftRight')) {
         if (!event.repeat) {
-          this.isShift = !this.isShift;
-          this.showSymbols(this.language, this.isCaps, this.isShift);
+          if (this.shiftCount === 0) {
+            this.isShift = !this.isShift;
+          }
+          this.shiftCount += 1;
+          this.showSymbols(this, this.language, this.isCaps, this.isShift);
         }
       } else if ((event.code === 'ControlLeft') || (event.code === 'ControlRight') || (event.metaKey)) {
         if (!event.repeat) {
@@ -561,7 +583,7 @@ class MyKeyboard {
               this.language = 'en';
             }
             localStorage.setItem('language', this.language);
-            this.showSymbols(this.language, this.isCaps, this.isShift);
+            this.showSymbols(this, this.language, this.isCaps, this.isShift);
           }
         }
       } else if (event.code === 'Tab') {
@@ -602,8 +624,11 @@ class MyKeyboard {
           }, 50);
         }
       } else if ((event.code === 'ShiftLeft') || (event.code === 'ShiftRight')) {
-        this.isShift = !this.isShift;
-        this.showSymbols(this.language, this.isCaps, this.isShift);
+        if (this.shiftCount === 1) {
+          this.isShift = !this.isShift;
+        }
+        this.shiftCount -= 1;
+        this.showSymbols(this, this.language, this.isCaps, this.isShift);
         setTimeout(() => {
           keyPress.classList.remove('active');
         }, 50);
@@ -619,7 +644,7 @@ class MyKeyboard {
       }
     });
 
-    this.keyboard.addEventListener('click', (event) => {
+    this.keyboard.addEventListener('mousedown', (event) => {
       if (event.target.classList.contains('keyboard-key')) {
         this.textContainer.focus();
 
@@ -631,6 +656,12 @@ class MyKeyboard {
         });
 
         document.dispatchEvent(eventHoldDown);
+      }
+    });
+
+    this.keyboard.addEventListener('mouseup', (event) => {
+      if (event.target.classList.contains('keyboard-key')) {
+        this.textContainer.focus();
 
         const eventReleased = new KeyboardEvent('keyup', {
           bubbles: true,
@@ -644,12 +675,12 @@ class MyKeyboard {
     });
   }
 
-  showSymbols(language = this.language, caps = this.isCaps, shift = this.isShift) {
+  showSymbols(contecst = this, language = this.language, caps = this.isCaps, shift = this.isShift) {
     const keyboard = this.keyboard.querySelectorAll('.keyboard-key');
     for (let i = 0; i < keyboard.length; i += 1) {
       let CapsParam = caps && this.allKeys[keyboard[i].dataset.keyCode].caps[language];
       if (shift) CapsParam = !CapsParam;
-      const elem = this.allKeys[keyboard[i].dataset.keyCode].writing[language][CapsParam];
+      const elem = contecst.allKeys[keyboard[i].dataset.keyCode].writing[language][CapsParam];
       keyboard[i].textContent = elem;
     }
   }
