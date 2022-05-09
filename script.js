@@ -507,13 +507,12 @@ class MyKeyboard {
 
     document.body.append(this.mainContainer);
 
-    this.showSymbols(this,this.language);
+    this.showSymbols(this, this.language);
 
     this.addActivity();
   }
 
   addActivity() {
-  
     this.textContainer.focus();
 
     this.textContainer.addEventListener('blur', () => {
@@ -523,25 +522,6 @@ class MyKeyboard {
     document.addEventListener('keydown', (event) => {
       event.stopImmediatePropagation();
 
-      function removeKeyActivity(event){
-        event.target.removeEventListener('mouseleave', removeKeyActivity);
-        if (event.target.dataset.keyCode === 'CapsLock') {
-        } else if (event.target.dataset.keyCode === 'ShiftLeft'||event.target.dataset.keyCode === 'ShiftRight'){
-          if (!event.target.classList.contains('active')) return
-          if (contecst.shiftCount === 1){
-            contecst.isShift = !contecst.isShift;
-            contecst.shiftCount = 0;
-          } else {
-            contecst.shiftCount -= 1;
-          }
-          contecst.showSymbols(contecst, contecst.language, contecst.isCaps, contecst.isShift);
-          event.target.classList.remove('active');
-        } else {
-          contecst.showSymbols(contecst, contecst.language, contecst.isCaps, contecst.isShift);
-          event.target.classList.remove('active');
-        }
-      }
-
       let keyPress = null;
       document.querySelectorAll('.keyboard-key').forEach((key) => {
         if (key.dataset.keyCode === event.code) {
@@ -550,11 +530,29 @@ class MyKeyboard {
       });
 
       if (!keyPress) return;
-      event.preventDefault(); 
+      event.preventDefault();
 
       keyPress.classList.add('active');
-      
-      let contecst = this;
+
+      const contecst = this;
+      function removeKeyActivity(removeEvent) {
+        removeEvent.target.removeEventListener('mouseleave', removeKeyActivity);
+        if (removeEvent.target.dataset.keyCode === 'ShiftLeft' || removeEvent.target.dataset.keyCode === 'ShiftRight') {
+          if (!removeEvent.target.classList.contains('active')) return;
+          if (contecst.shiftCount === 1) {
+            contecst.isShift = !contecst.isShift;
+            contecst.shiftCount = 0;
+          } else {
+            contecst.shiftCount -= 1;
+          }
+          contecst.showSymbols(contecst, contecst.language, contecst.isCaps, contecst.isShift);
+          removeEvent.target.classList.remove('active');
+        } else if (removeEvent.target.dataset.keyCode !== 'CapsLock') {
+          contecst.showSymbols(contecst, contecst.language, contecst.isCaps, contecst.isShift);
+          removeEvent.target.classList.remove('active');
+        }
+      }
+
       keyPress.addEventListener('mouseleave', removeKeyActivity);
 
       if (!this.allKeys[keyPress.dataset.keyCode].hasFunction) {
@@ -571,7 +569,7 @@ class MyKeyboard {
           }
           this.shiftCount += 1;
           this.showSymbols(this, this.language, this.isCaps, this.isShift);
-      }
+        }
       } else if ((event.code === 'ControlLeft') || (event.code === 'ControlRight') || (event.metaKey)) {
         if (!event.repeat) {
           this.isCtr = !this.isCtr;
@@ -626,10 +624,10 @@ class MyKeyboard {
           }, 50);
         }
       } else if ((event.code === 'ShiftLeft') || (event.code === 'ShiftRight')) {
-        if (this.shiftCount === 1 ) {
+        if (this.shiftCount === 1) {
           this.isShift = !this.isShift;
         }
-        this.shiftCount -= 1; 
+        this.shiftCount -= 1;
         this.showSymbols(this, this.language, this.isCaps, this.isShift);
         setTimeout(() => {
           keyPress.classList.remove('active');
